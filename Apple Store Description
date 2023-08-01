@@ -2,7 +2,7 @@ CREATE TABLE appleStore_description_combined AS
 
 SELECT * FROM appleStore_description1
 
-UNion ALL
+UNION ALL
 
 SELECT * FROM appleStore_description2
 
@@ -14,103 +14,103 @@ UNION ALL
 
 SELECT * FROM appleStore_description4
 
-**EXLPORATORY DATA ANALYSIS**
+# **EXLPORATORY DATA ANALYSIS**
 
--- check the number of unique apps in both tables
+# -- check the number of unique apps in both tables
 
 SELECT COUNT(DISTINCT id) AS UniqueAppIDs
-From AppleStore
+FROM AppleStore
 
 SELECT count(Distinct id) AS UniqueAppIDs
-From appleStore_description_combined
+FROM appleStore_description_combined
 
--- Check for any missing values in key fields
+# -- Check for any missing values in key fields
 SELECT Count(*) AS MissingValues
-From AppleStore
-WHERE track_name IS null OR user_rating IS null Or prime_genre IS NULL
+FROM AppleStore
+WHERE track_name IS null OR user_rating IS null OR prime_genre IS NULL
 
 SELECT Count(*) AS MissingValues
-From appleStore_description_combined
+FROM appleStore_description_combined
 WHERE app_desc IS null
 
--- Fiid out the number of apps per genre
+# -- Find out the number of apps per genre
 
-Select prime_genre, COUNT(*) AS NumApps
-From AppleStore
+SELECT prime_genre, COUNT(*) AS NumApps
+FROM AppleStore
 GROUP BY prime_genre
 ORDER BY NumApps DESC
 
--- Get an overview of the apps' rating
+# -- Get an overview of the apps' rating
 
-Select min(user_rating) AS MinRating,
-		max(user_rating) As MaxRating,
+SELECT min(user_rating) AS MinRating,
+		max(user_rating) AS MaxRating,
         avg(user_rating) AS AvgRating
-From AppleStore
+FROM AppleStore
 
--- Get the distribution of app prices
+# -- Get the distribution of app prices
 
 SELECT
 	(price / 2) *2 AS PriceBinStart,
     ((price / 2) *2) +2 AS PriceBinEnd,
-    Count (*) AS NumApps
-From AppleStore
+    COUNT (*) AS NumApps
+FROM AppleStore
 
-GRoUP By PriceBinStart
-ORDER By PriceBinStart
+GROUP BY PriceBinStart
+ORDER BY PriceBinStart
 
-**DATA ANALYSIS**
+# **DATA ANALYSIS**
 
--- Determine whether paid apps have higher ratings than free ones
+# -- Determine whether paid apps have higher ratings than free ones
 
 SELECT CASE
-		When price > 0 THEN 'Paid'
-        Else 'Free'
-     End As App_Type,
+		WHEN price > 0 THEN 'Paid'
+        ELSE 'Free'
+     END AS App_Type,
      avg(user_rating) AS Avg_Rating
 FROM AppleStore
-Group By App_Type
+GROUP BY App_Type
 
--- Check if app with more supported languages have higher ratings
+# -- Check if app with more supported languages have higher ratings
 
 SELECT CASE
 		WHEN lang_num < 10 THEN '<10 languages'
-        WHEN lang_num BETWEEN 10 and 30 THen '10-30 languages'
-        Else '>30 languages'
-    End AS language_bucket,
+        WHEN lang_num BETWEEN 10 AND 30 THEN '10-30 languages'
+        ELSE '>30 languages'
+    END AS language_bucket,
     avg(user_rating) AS Avg_Rating
-From AppleStore
+FROM AppleStore
 GROUP BY language_bucket
 ORDER BY Avg_Rating DESC
 
--- Check genres with low ratings
+# -- Check genres with low ratings
 
-SELECt prime_genre,
+SELECT prime_genre,
 		avg(user_rating) AS Avg_Rating
 FROM AppleStore
-GROup By prime_genre
-Order By Avg_Rating ASC
-Limit 10
+GROUP BY prime_genre
+ORDER BY Avg_Rating ASC
+LIMIT 10
 
--- Check if there is correlation between the length of the app description and the user rating
+# -- Check if there is correlation between the length of the app description and the user rating
 
 SELECT CASE
-		When length(b.app_desc) <500 THEN 'Short'
-        WHEN length(b.app_desc) BETWEEN 500 AND 1000 THEn 'Medium'
+		WHEN length(b.app_desc) <500 THEN 'Short'
+        WHEN length(b.app_desc) BETWEEN 500 AND 1000 THEN 'Medium'
         ELSE 'Long'
-     End As description_length_bucket,
+     END AS description_length_bucket,
      avg(a.user_rating) AS average_rating
      
 FROM
 	AppleStore AS A 
 JOIN
-	appleStore_description_combined as b 
+	appleStore_description_combined AS b 
 ON
 	a.id = b.id
     
-group BY description_length_bucket
-Order BY average_rating DESC
+GROUP BY description_length_bucket
+ORDER BY average_rating DESC
 
--- Check the top-rated apps for each genre
+# -- Check the top-rated apps for each genre
 
 SELECT
 	prime_genre,
@@ -125,5 +125,5 @@ FROM (
         FROM
         AppleStore
         ) AS a 
-Where 
+WHERE 
 a.rank = 1
